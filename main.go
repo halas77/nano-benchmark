@@ -8,7 +8,7 @@ import (
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/gocolly/colly/v2"
-	"github.com/halas77/nano-scrape/engine"
+	"github.com/halas77/nano-scrape/nano"
 )
 
 const targetURL = "https://quotes.toscrape.com/"
@@ -67,7 +67,7 @@ func runGoQuery(url string) ([]map[string]string, time.Duration, error) {
 
 func runNanoScrape(url string) ([]map[string]string, time.Duration, error) {
 	start := time.Now()
-	doc, err := engine.LoadDocument(url)
+	doc, err := nano.LoadDocument(url)
 	if err != nil {
 		return nil, 0, err
 	}

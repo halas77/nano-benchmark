@@ -10,7 +10,7 @@ import (
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/gocolly/colly/v2"
-	"github.com/halas77/nano-scrape/engine"
+	"github.com/halas77/nano-scrape/nano"
 )
 
 var htmlContent string
@@ -86,7 +86,7 @@ func BenchmarkHTTPScraping(b *testing.B) {
 	b.Run("NanoScrape", func(b *testing.B) {
 		b.ReportAllocs()
 		for i := 0; i < b.N; i++ {
-			doc, err := engine.LoadDocument(server.URL)
+			doc, err := nano.LoadDocument(server.URL)
 			if err != nil {
 				b.Fatal(err)
 			}
@@ -134,7 +134,7 @@ func BenchmarkParsingOnly(b *testing.B) {
 	b.Run("NanoScrape", func(b *testing.B) {
 		b.ReportAllocs()
 		for i := 0; i < b.N; i++ {
-			doc, err := engine.InitDocument(htmlContent)
+			doc, err := nano.InitDocument(htmlContent)
 			if err != nil {
 				b.Fatal(err)
 			}
