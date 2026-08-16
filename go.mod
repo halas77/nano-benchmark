@@ -1,6 +1,6 @@
 module scraper-benchmark
 
-go 1.26.4
+go 1.25.6
 
 require (
 	github.com/PuerkitoBio/goquery v1.12.0

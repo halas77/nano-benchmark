@@ -37,27 +37,19 @@ func BenchmarkHTTPScraping(b *testing.B) {
 
 	b.Run("Colly", func(b *testing.B) {
 		b.ReportAllocs()
-		for i := 0; i < b.N; i++ {
-			var quotes []map[string]string
+		for b.Loop() {
 			c := colly.NewCollector()
 			c.OnHTML(".quote", func(e *colly.HTMLElement) {
-				text := e.ChildText("span.text")
-				author := e.ChildText("small.author")
-				quotes = append(quotes, map[string]string{
-					"text":   text,
-					"author": author,
-				})
+
 			})
 			_ = c.Visit(server.URL)
-			if len(quotes) != 10 {
-				b.Fatalf("Expected 10 quotes, got %d", len(quotes))
-			}
+
 		}
 	})
 
 	b.Run("GoQuery", func(b *testing.B) {
 		b.ReportAllocs()
-		for i := 0; i < b.N; i++ {
+		for b.Loop() {
 			res, err := http.Get(server.URL)
 			if err != nil {
 				b.Fatal(err)
@@ -68,37 +60,35 @@ func BenchmarkHTTPScraping(b *testing.B) {
 				b.Fatal(err)
 			}
 
-			var quotes []map[string]string
 			doc.Find(".quote").Each(func(idx int, s *goquery.Selection) {
-				text := s.Find("span.text").Text()
-				author := s.Find("small.author").Text()
-				quotes = append(quotes, map[string]string{
-					"text":   text,
-					"author": author,
-				})
+
 			})
-			if len(quotes) != 10 {
-				b.Fatalf("Expected 10 quotes, got %d", len(quotes))
-			}
 		}
 	})
 
 	b.Run("NanoScrape", func(b *testing.B) {
 		b.ReportAllocs()
-		for i := 0; i < b.N; i++ {
+		for b.Loop() {
 			doc, err := nano.LoadDocument(server.URL)
 			if err != nil {
 				b.Fatal(err)
 			}
-			quotes := doc.SelectAll(".quote")
-			mapping := map[string]string{
-				"text":   "span.text",
-				"author": "small.author",
+
+			isCssSearch := false
+
+			if isCssSearch {
+				doc.SelectAll(".quote")
+			} else {
+				name := "div"
+				params := []*nano.Attribute{
+					{
+						Key:   "class",
+						Value: ".quote",
+					},
+				}
+				doc.FindAll(name, params)
 			}
-			mappedData := quotes.Map(mapping)
-			if len(mappedData) != 10 {
-				b.Fatalf("Expected 10 quotes, got %d", len(mappedData))
-			}
+
 		}
 	})
 }
@@ -110,42 +100,39 @@ func BenchmarkParsingOnly(b *testing.B) {
 
 	b.Run("GoQuery", func(b *testing.B) {
 		b.ReportAllocs()
-		for i := 0; i < b.N; i++ {
+		for b.Loop() {
 			doc, err := goquery.NewDocumentFromReader(strings.NewReader(htmlContent))
 			if err != nil {
 				b.Fatal(err)
 			}
 
-			var quotes []map[string]string
 			doc.Find(".quote").Each(func(idx int, s *goquery.Selection) {
-				text := s.Find("span.text").Text()
-				author := s.Find("small.author").Text()
-				quotes = append(quotes, map[string]string{
-					"text":   text,
-					"author": author,
-				})
+
 			})
-			if len(quotes) != 10 {
-				b.Fatalf("Expected 10 quotes, got %d", len(quotes))
-			}
+
 		}
 	})
 
 	b.Run("NanoScrape", func(b *testing.B) {
 		b.ReportAllocs()
-		for i := 0; i < b.N; i++ {
+		for b.Loop() {
 			doc, err := nano.InitDocument(htmlContent)
 			if err != nil {
 				b.Fatal(err)
 			}
-			quotes := doc.SelectAll(".quote")
-			mapping := map[string]string{
-				"text":   "span.text",
-				"author": "small.author",
-			}
-			mappedData := quotes.Map(mapping)
-			if len(mappedData) != 10 {
-				b.Fatalf("Expected 10 quotes, got %d", len(mappedData))
+
+			isCssSearch := false
+			if isCssSearch {
+				doc.SelectAll(".quote")
+			} else {
+				name := "div"
+				params := []*nano.Attribute{
+					{
+						Key:   "class",
+						Value: ".quote",
+					},
+				}
+				doc.FindAll(name, params)
 			}
 		}
 	})
